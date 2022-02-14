@@ -25,6 +25,9 @@ function App() {
             name,
             pass
           })
+          if (res?.data?.token) {
+            localStorage.setItem('token', res?.data?.token)
+          }
         })()
       setName()
       setPass()
@@ -39,6 +42,9 @@ function App() {
             name,
             pass
           })
+          if (res?.data?.token) {
+            localStorage.setItem('token', res?.data?.token)
+          }
         })()
       setName()
       setPass()
