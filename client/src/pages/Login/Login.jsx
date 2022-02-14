@@ -1,8 +1,8 @@
-import './App.css';
+import './Login.css'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-function App() {
+function Login() {
 
   const [name, setName] = useState()
   const [pass, setPass] = useState()
@@ -71,4 +71,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;
