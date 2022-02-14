@@ -7,19 +7,20 @@ module.exports = {
   },
   SIGN_UP: async (req, res) => {
     try {
-      const { name, pass } = req.body
       const CHECK_USER = `
-        SELECT * FROM users where user_name = $1
+      SELECT * FROM users where lower(user_name) = lower($1)
       `
-      const hasUser = await fetch(CHECK_USER, name)
-      if (hasUser) return res.send('This name is taken')
-      
       const CREATE_USER = `
       INSERT INTO users(user_name, user_pass) VALUES($1, crypt($2, gen_salt('bf'))) returning *
       `
+
+      const { name, pass } = req.body
+
+      const hasUser = await fetch(CHECK_USER, name)
+      if (hasUser) return res.send('This name is taken')
+      
       const newUser = await fetch(CREATE_USER, name, pass)
       if (newUser){
-
         res.json({
           token: sign({userID: newUser.user_id})
         })
@@ -31,23 +32,18 @@ module.exports = {
   },
   LOGIN_POST: async (req, res) => {
     try {
-      const { name, pass } = req.body
       const CHECK_USER = `
-        SELECT * FROM users where user_name = $1 AND user_pass = crypt($2, gen_salt('bf'))
+      SELECT * FROM users where lower(user_name) = lower($1) AND user_pass = crypt($2, user_pass)
       `
-      const hasUser = await fetch(CHECK_USER, name)
-      if (hasUser) return res.send('This name is taken')
-      
-      const CREATE_USER = `
-      INSERT INTO users(user_name, user_pass) VALUES($1, crypt($2, gen_salt('bf'))) returning *
-      `
-      const newUser = await fetch(CREATE_USER, name, pass)
-      if (newUser){
 
+      const { name, pass } = req.body
+
+      const hasUser = await fetch(CHECK_USER, name, pass)
+      if (!hasUser) return res.send('User not found')
+      
         res.json({
-          token: sign({userID: newUser.user_id})
+          token: sign({userID: hasUser.user_id})
         })
-      }
 
     } catch (error) {
       console.log(error)
