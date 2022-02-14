@@ -2,9 +2,9 @@ const { Pool } = require('pg')
 
 const host = {
   host: 'localhost',
-  database: 'contacts',
+  database: 'push',
   user: 'postgres',
-  password: '6665',
+  password: '1',
   port: 5432
 }
 const devConfig = `postgresql://${host.user}:${host.password}@${host.host}:${host.port}/${host.database}`
@@ -16,16 +16,29 @@ const pool = new Pool({
 })
 
 
-const pg = async (SQL, ...params) => {
-  const client = await pool.connect()
-
-  try {
-      const { rows }  = await pool.query(SQL, params)
-      return rows
-
-  } finally {
-      client.release()
-  }
+const fetch = async (SQL, ...params) => {
+	const client = await pool.connect()
+	try {
+		const { rows: [row] } = await client.query(SQL, params.length ? params : null)
+		return row
+	}
+	finally {
+		client.release()
+	}
 }
 
-module.exports.pg = pg
+const fetchAll = async (SQL, ...params) => {
+	const client = await pool.connect()
+	try {
+		const { rows } = await client.query(SQL, params.length ? params : null)
+		return rows
+	}
+	finally {
+		client.release()
+	}
+}
+
+module.exports = {
+  fetch,
+  fetchAll
+}
