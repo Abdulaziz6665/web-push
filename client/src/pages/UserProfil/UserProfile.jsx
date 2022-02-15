@@ -1,9 +1,12 @@
 import './UserProfile.css'
 import axios from "axios"
 import { useEffect, useState } from "react"
+import { useNavigate } from 'react-router-dom'
 
 
 function UserProfile() {
+
+  const navigate = useNavigate()
 
   const [user, setUser] = useState()
   const [userID, setUserID] = useState()
@@ -11,6 +14,8 @@ function UserProfile() {
   const [text, setText] = useState()
   const [doc, setDoc] = useState()
   const [submit, setSubmit] = useState(false)
+
+  const [chats, setChat] = useState()
 
   useEffect(() => {
     ; (async () => {
@@ -29,19 +34,18 @@ function UserProfile() {
   useEffect(() => {
     if (submit && userID && selectedUser && (text || doc)) {
         let data = new FormData()
-        if (doc[0]) {
+        if (doc && doc[0]) {
           data.append('file', doc[0])
-          console.log(data, doc)
+          console.log(data)
         }
       ;(async () => {
-        const res = await axios.post('http://localhost:3001/chat', data, {
+        await axios.post('http://localhost:3001/chat', data, {
           headers: {
             userID,
             selectedUser: selectedUser?.user_id,
             text
           }
         })
-        console.log(res)
       })()
       setText()
       setDoc()
@@ -49,8 +53,31 @@ function UserProfile() {
     }
   }, [userID, selectedUser, text, doc, submit])
 
+
+  useEffect(() => {
+    if (userID && selectedUser) {
+      ;(async () => {
+        const res = await axios.get('http://localhost:3001/chats-get', {
+          params: {
+            userID,
+            selectedUser: selectedUser?.user_id
+          }
+        })
+        if (res?.data) {
+          setChat(res.data)
+        }
+      })()
+    }
+  }, [userID, selectedUser])
+
+  function logOut () {
+    localStorage.removeItem('token')
+    navigate('/login')
+  }
+
   return (
     <>
+      <button onClick={logOut}>log out</button>
       <div  className="main-div">
         <div>
           <div>Welcome {user && user?.user?.user_name}</div>
@@ -69,14 +96,22 @@ function UserProfile() {
           </ul>
         </div>
         {selectedUser && <div>
-          <div>{selectedUser?.user_name}</div>
+          <div className='block'>chat with {selectedUser?.user_name}</div>
+
+          {
+            chats && chats.map((e, idx) => (
+              <li className={e.sender_user_id === user?.user?.user_id ? 'chats chat-right' :'chats'} key={idx}>
+                <span>{e.sender_user_id === user?.user?.user_id ? user?.user?.user_name : selectedUser?.user_name}</span>
+                <p>{e.chat}</p>
+              </li>
+            ))
+          }
           <ul>
-            <li>
-              <span>{selectedUser?.user_name}</span>
-              <p>salam</p>
-            </li>
           </ul>
-          <form onSubmit={e => e.preventDefault()}>
+          <form onSubmit={e => {
+            e.preventDefault()
+            e.target.reset()
+          }}>
             <input type="file" accept='.jpg, .jpeg, .png, .xlsx, .docx' onChange={e => setDoc(e.target.files)}/>
             <input type="text" onChange={e => setText(e.target.value)}/>
             <button onClick={() => setSubmit(true)}>send</button>

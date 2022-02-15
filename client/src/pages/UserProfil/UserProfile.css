@@ -3,3 +3,33 @@
   align-items: center;
   justify-content: space-around;
 }
+
+.block {
+  margin-bottom: 35px;
+  padding: 10px;
+  border: 1px solid #000;
+}
+
+.chats{
+  display: flex;
+}
+
+.chats span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 2px;
+  min-width: 20px;
+  height: 20px;
+  font-size: 16px;
+  border: 1px solid #000;
+  border-radius: 15px;
+}
+
+.chat-right {
+  justify-content: flex-end;
+}
+.chat-right span {
+  order: 1;
+}

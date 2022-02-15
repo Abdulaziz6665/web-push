@@ -13,15 +13,16 @@ function App() {
   useEffect(() => {
     if (!token || token.length < 150) {
       navigate('/login')
+    } else {
+      navigate('/user')
     }
   }, [navigate, token])
   
   return (
     <>
       <Routes>
-          <Route path='/login' element={<Login />} />
           <Route path='/user' element={<UserProfile />} />
-
+          <Route path='/login' element={<Login />} />
       </Routes>
     </>
   )

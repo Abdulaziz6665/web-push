@@ -1,8 +1,11 @@
 import './Login.css'
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
+
+  const navigate = useNavigate()
 
   const [name, setName] = useState()
   const [pass, setPass] = useState()
@@ -27,12 +30,13 @@ function Login() {
           })
           if (res?.data?.token) {
             localStorage.setItem('token', res?.data?.token)
+            navigate('/user')
           }
         })()
       setName()
       setPass()
     }
-  }, [name, pass, submit, button])
+  }, [name, pass, submit, button, navigate])
 
   useEffect(() => {
     if (name && pass && submit && button === 'sign up') {
@@ -44,12 +48,13 @@ function Login() {
           })
           if (res?.data?.token) {
             localStorage.setItem('token', res?.data?.token)
+            navigate('/user')
           }
         })()
       setName()
       setPass()
     }
-  }, [name, pass, submit, button])
+  }, [name, pass, submit, button, navigate])
 
   return (
     <>
