@@ -80,28 +80,36 @@ function UserProfile() {
     navigate('/login')
   }
 
-  async function register () {
-    console.log('lll')
-    if (notify) {
-      const worker = await window.navigator.serviceWorker.ready
-  
-      const pushManager = await worker.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
-      })
-  
-      const res = await axios.post('http://localhost:3001/sub', {
-        pushManager,
-        userID
-      })
 
-      console.log(res.data)
-      if (res.data === 'created') {
-        localStorage.setItem('notify', true)
-      }
+  useEffect(() => {
+    if (notify) {
+      ; (async () => {
+        const worker = await window.navigator.serviceWorker.ready
+
+        const pushManager = await worker.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
+        })
+
+        console.log('lll', pushManager)
+        const res = await axios.post('http://localhost:3001/sub', {
+          pushManager,
+          userID
+        })
+
+        console.log(res.data)
+        if (res.data === 'created') {
+          localStorage.setItem('notify', true)
+        }
+      })()
       setNotify(false)
     }
-  }
+
+  }, [notify, userID])
+
+  // useEffect(() => {
+    
+  // }), []
 
   // async function unRegister() {
   //   const worker = await window.navigator.serviceWorker.ready
@@ -114,10 +122,9 @@ function UserProfile() {
   return (
     <>
       <button onClick={logOut}>log out</button>
-      {!localStorage.getItem('notify') && <button onClick={() => {
-        register()
+      <button onClick={() => {
         setNotify(true)
-      }}>notification</button>}
+      }}>notification</button>
       {/* <button onClick={unRegister}>turn off notification</button> */}
       <div className="main-div">
         <div>

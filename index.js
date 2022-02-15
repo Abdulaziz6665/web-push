@@ -40,39 +40,43 @@ const IO = socket(server, {
 })
 
 IO.on('connection', socket => {
-  socket.on('message', async ({userID, selectedUser, text, senderUser }) => {
-    const CHAT = `
-        INSERT INTO chat(
-          chat,
-          sender_user_id,
-          taked_user_id
-        ) VALUES ($1, $2, $3)
-        returning *
-    `
-
-    const SUBSC = `
-        SELECT * FROM web_push WHERE user_id = $1
-    `
-    
-    let subscriber = await fetch(SUBSC, selectedUser)
-    if (subscriber) {
+  try {
+    socket.on('message', async ({userID, selectedUser, text, senderUser }) => {
+      const CHAT = `
+          INSERT INTO chat(
+            chat,
+            sender_user_id,
+            taked_user_id
+          ) VALUES ($1, $2, $3)
+          returning *
+      `
+  
+      const SUBSC = `
+          SELECT * FROM web_push WHERE user_id = $1
+      `
       
-      let subscription = {
-        endpoint: subscriber.endpoint_b,
-        expiration_time: null,
-        keys: {
-          p256dh: subscriber.p256dh,
-          auth: subscriber.auth
+      let subscriber = await fetch(SUBSC, selectedUser)
+      if (subscriber) {
+        
+        let subscription = {
+          endpoint: subscriber.endpoint_b,
+          expiration_time: null,
+          keys: {
+            p256dh: subscriber.p256dh,
+            auth: subscriber.auth
+          }
         }
+        webPush.sendNotification(subscription, senderUser + ' send: ' + text)
       }
-      webPush.sendNotification(subscription, senderUser + ' send: ' + text)
-    }
-
-    if (text) {
-      const createChat = await fetch(CHAT, text, userID, selectedUser)
-      IO.emit('message', createChat)
-    }
-  })
+  
+      if (text) {
+        const createChat = await fetch(CHAT, text, userID, selectedUser)
+        IO.emit('message', createChat)
+      }
+    })
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 
