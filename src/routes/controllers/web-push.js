@@ -22,8 +22,10 @@ module.exports = {
         
         fetch(WEB_PUSH, userID, pushManager.endpoint, null, pushManager.keys.p256dh, pushManager.keys.auth)
         res.send('created')
+      } else {
+
+        res.send('no')
       }
-      res.send('no')
     } catch (error) {
       console.log(error)
     }

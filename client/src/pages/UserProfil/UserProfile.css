@@ -4,6 +4,11 @@
   justify-content: space-around;
 }
 
+.second {
+  width: 100%;
+  max-width: 300px;
+}
+
 .block {
   margin-bottom: 35px;
   padding: 10px;

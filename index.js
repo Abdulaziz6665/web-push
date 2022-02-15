@@ -7,6 +7,7 @@ const webPush = require('web-push')
 const path = require('path')
 const { fetch, fetchAll } = require('./src/pg/pg')
 const { router } = require('./src/routes/routes')
+const { sign } = require('./src/lib/jwt')
 
 
 const server = http.createServer(app)
@@ -83,6 +84,25 @@ IO.on('connection', socket => {
       if (text) {
         const createChat = await fetch(CHAT, text, userID, selectedUser)
         IO.emit('message', createChat)
+      }
+    })
+
+    socket.on('new_user', async ({ name, pass }) => {
+      const CHECK_USER = `
+      SELECT * FROM users where lower(user_name) = lower($1)
+      `
+      const CREATE_USER = `
+      INSERT INTO users(user_name, user_pass) VALUES($1, crypt($2, gen_salt('bf'))) returning *
+      `
+      const hasUser = await fetch(CHECK_USER, name)
+      if (hasUser) return IO.emit('new_user', 'This name is taken')
+
+      const newUser = await fetch(CREATE_USER, name, pass)
+      if (newUser) {
+        IO.emit('new_user', {
+          token: sign({ userID: newUser.user_id }),
+          newUser
+        })
       }
     })
   } catch (error) {

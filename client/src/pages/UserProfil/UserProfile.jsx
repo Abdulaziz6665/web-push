@@ -3,6 +3,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import io from 'socket.io-client';
+// import { useNewUser } from '../context'
 
 
 function UserProfile() {
@@ -19,6 +20,10 @@ function UserProfile() {
 
   const [chats, setChat] = useState([])
   const [notify, setNotify] = useState(false)
+
+  const [hasNotify, setHasNotify] = useState()
+
+  // const [signedUser, setNewUser] = useNewUser()
 
   const host = window.location.origin === 'http://localhost:3000' ? 'http://localhost:3001' : window.location.origin
 
@@ -40,6 +45,14 @@ function UserProfile() {
       }
     })()
   }, [host])
+
+  // useEffect(() => {
+  //   if (signedUser && user) {
+  //     setUser(prev => ({user: prev?.user, anothers: [...prev?.anothers, signedUser]}))
+  //     console.log(signedUser, user)
+  //     setNewUser()
+  //   }
+  // }, [signedUser, setNewUser, user, user?.anothers?.length])
 
   useEffect(() => {
     if (socket && submit && userID && selectedUser && (text || doc)) {
@@ -107,9 +120,9 @@ function UserProfile() {
 
   }, [notify, userID, host])
 
-  // useEffect(() => {
-    
-  // }), []
+  useEffect(() => {
+    setHasNotify(localStorage.getItem('notify'))
+  }, [])
 
   // async function unRegister() {
   //   const worker = await window.navigator.serviceWorker.ready
@@ -122,9 +135,10 @@ function UserProfile() {
   return (
     <>
       <button onClick={logOut}>log out</button>
-      <button onClick={() => {
+      {!hasNotify && <button onClick={() => {
         setNotify(true)
-      }}>notification</button>
+        setHasNotify(true)
+      }}>notification</button>}
       {/* <button onClick={unRegister}>turn off notification</button> */}
       <div className="main-div">
         <div>
@@ -145,7 +159,7 @@ function UserProfile() {
             }
           </ul>
         </div>
-        {selectedUser && <div>
+        {selectedUser && <div className='second'>
           <div className='block'>chat with {selectedUser?.user_name}</div>
 
           {

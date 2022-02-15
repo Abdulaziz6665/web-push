@@ -6,7 +6,7 @@ const chat = require('./controllers/chat')
 const push = require('./controllers/web-push')
 
 router.post('/login', login.LOGIN_POST)
-router.post('/signup', login.SIGN_UP)
+// router.post('/signup', login.SIGN_UP)
 router.get('/user', user.USER)
 router.get('/chats-get', chat.CHATS_GET)
 router.post('/sub', push.WEB_PUSH)
