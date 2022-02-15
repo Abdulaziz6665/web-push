@@ -38,7 +38,7 @@ function Login() {
       setName()
       setPass()
     }
-  }, [name, pass, submit, button, navigate])
+  }, [name, pass, submit, button, navigate, host])
 
   useEffect(() => {
     if (name && pass && submit && button === 'sign up') {
@@ -56,7 +56,7 @@ function Login() {
       setName()
       setPass()
     }
-  }, [name, pass, submit, button, navigate])
+  }, [name, pass, submit, button, navigate, host])
 
   return (
     <>

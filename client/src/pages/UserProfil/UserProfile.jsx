@@ -25,7 +25,7 @@ function UserProfile() {
   useEffect(() => {
     const newSocket = io(host)
     setSocket(newSocket);
-  }, []);
+  }, [host]);
 
   useEffect(() => {
     ; (async () => {
@@ -39,7 +39,7 @@ function UserProfile() {
         setUserID(res?.data?.user.user_id)
       }
     })()
-  }, [])
+  }, [host])
 
   useEffect(() => {
     if (socket && submit && userID && selectedUser && (text || doc)) {
@@ -75,7 +75,7 @@ function UserProfile() {
         }
       })()
     }
-  }, [userID, selectedUser])
+  }, [userID, selectedUser, host])
 
   function logOut() {
     localStorage.removeItem('token')
@@ -105,7 +105,7 @@ function UserProfile() {
       setNotify(false)
     }
 
-  }, [notify, userID])
+  }, [notify, userID, host])
 
   // useEffect(() => {
     
