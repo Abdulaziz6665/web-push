@@ -95,6 +95,10 @@ function UserProfile() {
     navigate('/login')
   }
 
+  function reloadPage() {
+    navigate('/')
+  }
+
 
   useEffect(() => {
     if (notify) {
@@ -134,6 +138,7 @@ function UserProfile() {
 
   return (
     <>
+      <button onClick={reloadPage}>reload page</button>
       <button onClick={logOut}>log out</button>
       {!hasNotify && <button onClick={() => {
         setNotify(true)
