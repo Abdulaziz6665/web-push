@@ -16,9 +16,9 @@ function UserProfile() {
   const [text, setText] = useState()
   const [doc, setDoc] = useState()
   const [submit, setSubmit] = useState(false)
-  const [ttt, tttt] = useState(false)
 
   const [chats, setChat] = useState([])
+  const [pushNotify, setNotify] = useState()
 
   useEffect(() => {
     const newSocket = io('http://localhost:3001')
@@ -41,22 +41,12 @@ function UserProfile() {
 
   useEffect(() => {
     if (socket && submit && userID && selectedUser && (text || doc)) {
-      socket.emit('message', { userID, selectedUser: selectedUser?.user_id, text })
+      socket.emit('message', { userID, selectedUser: selectedUser?.user_id, text, pushNotify })
       setSubmit(false)
       setText()
       setDoc()
     }
-  }, [socket, submit, userID, selectedUser, text, doc])
-
-  // useEffect(() => {
-  //   if (userID && selectedUser && ttt) {
-  //     socket.emit('chats', { userID, selectedUser: selectedUser?.user_id })
-  //     socket.on('chats', data => {
-  //       setChat(data)
-  //     })
-  //     tttt(false)
-  //   }
-  // }, [userID, selectedUser, socket, ttt])
+  }, [socket, submit, userID, selectedUser, text, doc, pushNotify])
 
   useEffect(() => {
     if (socket) {
@@ -68,30 +58,6 @@ function UserProfile() {
       })
     }
   }, [socket, userID])
-
-
-  // useEffect(() => {
-  //   if (submit && userID && selectedUser && (text || doc)) {
-  //     let data = new FormData()
-  //     if (doc && doc[0]) {
-  //       data.append('file', doc[0])
-  //       console.log(data)
-  //     }
-  //     ; (async () => {
-  //       await axios.post('http://localhost:3001/chat', data, {
-  //         headers: {
-  //           userID,
-  //           selectedUser: selectedUser?.user_id,
-  //           text
-  //         }
-  //       })
-  //     })()
-  //     setText()
-  //     setDoc()
-  //     setSubmit(false)
-  //   }
-  // }, [userID, selectedUser, text, doc, submit])
-
 
   useEffect(() => {
     if (userID && selectedUser) {
@@ -109,14 +75,56 @@ function UserProfile() {
     }
   }, [userID, selectedUser])
 
+
+  useEffect(() => {
+    if (submit && text) {
+      ; (async () => {
+        const worker = await window.navigator.serviceWorker.ready
+
+        const pushManager = await worker.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
+        })
+        axios.post('http://localhost:3001/sub', {
+          pushManager: JSON.stringify(pushManager),
+          text,
+          user: user?.user?.user_name
+        })
+      }) ()
+      setSubmit(false)
+    }
+  }, [submit, text, user])
+
   function logOut() {
     localStorage.removeItem('token')
     navigate('/login')
   }
 
+  // async function register () {
+  //   const worker = await window.navigator.serviceWorker.ready
+
+  // 	const pushManager = await worker.pushManager.subscribe({
+  // 		userVisibleOnly: true,
+  // 		applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
+  // 	})
+
+  // 	setNotify(pushManager)
+  // 	console.log(pushManager)
+  // }
+
+  async function unRegister() {
+    const worker = await window.navigator.serviceWorker.ready
+
+    const subscription = await worker.pushManager.getSubscription()
+
+    await subscription.unsubscribe()
+  }
+
   return (
     <>
       <button onClick={logOut}>log out</button>
+      {/* <button onClick={register}>notification</button> */}
+      <button onClick={unRegister}>turn off notification</button>
       <div className="main-div">
         <div>
           <div>Welcome {user && user?.user?.user_name}</div>
@@ -127,7 +135,6 @@ function UserProfile() {
               user?.anothers && user?.anothers.map((e, idx) => (
                 <li key={idx}>
                   <button onClick={() => {
-                    tttt(true)
                     setSelectedUser({ user_id: e.user_id, user_name: e.user_name })
                   }}>
                     {e.user_name}
