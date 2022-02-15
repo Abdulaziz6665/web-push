@@ -48,25 +48,26 @@ function UserProfile() {
     }
   }, [socket, submit, userID, selectedUser, text, doc])
 
-  useEffect(() => {
-    if (userID && selectedUser && ttt) {
-      socket.emit('chats', { userID, selectedUser: selectedUser?.user_id })
-      socket.on('chats', data => {
-        setChat(data)
-      })
-      tttt(false)
-    }
-  }, [userID, selectedUser, socket, ttt])
+  // useEffect(() => {
+  //   if (userID && selectedUser && ttt) {
+  //     socket.emit('chats', { userID, selectedUser: selectedUser?.user_id })
+  //     socket.on('chats', data => {
+  //       setChat(data)
+  //     })
+  //     tttt(false)
+  //   }
+  // }, [userID, selectedUser, socket, ttt])
 
   useEffect(() => {
     if (socket) {
       socket.on('message', (data) => {
-        if (data) {
+        let check = data.sender_user_id === userID || data.taked_user_id === userID
+        if (data && check) {
           setChat(prev => [...prev, data])
         }
       })
     }
-  }, [socket])
+  }, [socket, userID])
 
 
   // useEffect(() => {
@@ -92,21 +93,21 @@ function UserProfile() {
   // }, [userID, selectedUser, text, doc, submit])
 
 
-  // useEffect(() => {
-  //   if (userID && selectedUser) {
-  //     ; (async () => {
-  //       const res = await axios.get('http://localhost:3001/chats-get', {
-  //         params: {
-  //           userID,
-  //           selectedUser: selectedUser?.user_id
-  //         }
-  //       })
-  //       if (res?.data) {
-  //         setChat(res.data)
-  //       }
-  //     })()
-  //   }
-  // }, [userID, selectedUser])
+  useEffect(() => {
+    if (userID && selectedUser) {
+      ; (async () => {
+        const res = await axios.get('http://localhost:3001/chats-get', {
+          params: {
+            userID,
+            selectedUser: selectedUser?.user_id
+          }
+        })
+        if (res?.data) {
+          setChat(res.data)
+        }
+      })()
+    }
+  }, [userID, selectedUser])
 
   function logOut() {
     localStorage.removeItem('token')

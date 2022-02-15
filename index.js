@@ -41,14 +41,6 @@ IO.on('connection', socket => {
       IO.emit('message', createChat)
     }
   })
-
-  socket.on('chats', async ({userID, selectedUser}) => {
-    const CHATS = `
-    SELECT * from chat WHERE (sender_user_id in($1, $2)) AND (taked_user_id in($1, $2)) order by created_at asc
-    `
-    const chats = await fetchAll(CHATS, userID, selectedUser)
-    IO.emit('chats', chats)
-  })
 })
 
 
