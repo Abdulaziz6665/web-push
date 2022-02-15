@@ -18,7 +18,7 @@ function UserProfile() {
   const [submit, setSubmit] = useState(false)
 
   const [chats, setChat] = useState([])
-  const [pushNotify, setNotify] = useState()
+  const [notify, setNotify] = useState(false)
 
   useEffect(() => {
     const newSocket = io('http://localhost:3001')
@@ -41,12 +41,12 @@ function UserProfile() {
 
   useEffect(() => {
     if (socket && submit && userID && selectedUser && (text || doc)) {
-      socket.emit('message', { userID, selectedUser: selectedUser?.user_id, text, pushNotify })
+      socket.emit('message', { userID, selectedUser: selectedUser?.user_id, text, senderUser: user?.user?.user_name })
       setSubmit(false)
       setText()
       setDoc()
     }
-  }, [socket, submit, userID, selectedUser, text, doc, pushNotify])
+  }, [socket, submit, userID, selectedUser, text, doc, user])
 
   useEffect(() => {
     if (socket) {
@@ -75,56 +75,42 @@ function UserProfile() {
     }
   }, [userID, selectedUser])
 
-
-  useEffect(() => {
-    if (submit && text) {
-      ; (async () => {
-        const worker = await window.navigator.serviceWorker.ready
-
-        const pushManager = await worker.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
-        })
-        axios.post('http://localhost:3001/sub', {
-          pushManager: JSON.stringify(pushManager),
-          text,
-          user: user?.user?.user_name
-        })
-      }) ()
-      setSubmit(false)
-    }
-  }, [submit, text, user])
-
   function logOut() {
     localStorage.removeItem('token')
     navigate('/login')
   }
 
-  // async function register () {
+  async function register () {
+
+    if (notify) {
+      const worker = await window.navigator.serviceWorker.ready
+  
+      const pushManager = await worker.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
+      })
+  
+      axios.post('http://localhost:3001/sub', {
+        pushManager,
+        userID
+      })
+      setNotify(false)
+    }
+  }
+
+  // async function unRegister() {
   //   const worker = await window.navigator.serviceWorker.ready
 
-  // 	const pushManager = await worker.pushManager.subscribe({
-  // 		userVisibleOnly: true,
-  // 		applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
-  // 	})
+  //   const subscription = await worker.pushManager.getSubscription()
 
-  // 	setNotify(pushManager)
-  // 	console.log(pushManager)
+  //   await subscription.unsubscribe()
   // }
-
-  async function unRegister() {
-    const worker = await window.navigator.serviceWorker.ready
-
-    const subscription = await worker.pushManager.getSubscription()
-
-    await subscription.unsubscribe()
-  }
 
   return (
     <>
       <button onClick={logOut}>log out</button>
-      {/* <button onClick={register}>notification</button> */}
-      <button onClick={unRegister}>turn off notification</button>
+      <button onClick={register}>notification</button>
+      {/* <button onClick={unRegister}>turn off notification</button> */}
       <div className="main-div">
         <div>
           <div>Welcome {user && user?.user?.user_name}</div>
@@ -163,7 +149,10 @@ function UserProfile() {
           }}>
             <input type="file" accept='.jpg, .jpeg, .png, .xlsx, .docx' onChange={e => setDoc(e.target.files)} />
             <input type="text" onChange={e => setText(e.target.value)} />
-            <button onClick={() => setSubmit(true)}>send</button>
+            <button onClick={() => {
+              setSubmit(true)
+              setNotify(true)
+            }}>send</button>
           </form>
         </div>}
       </div>

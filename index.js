@@ -3,7 +3,7 @@ const app = express()
 const cors = require('cors')
 const http = require('http')
 const socket = require('socket.io')
-
+const webPush = require('web-push')
 
 const { fetch, fetchAll } = require('./src/pg/pg')
 
@@ -22,10 +22,15 @@ app.use(cors())
 app.use(router)
 
 
+const publicKey = 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU'
+const privateKey = 'bzegeZthepS5705Qzq50IurA_9x7a6DcEjwzwVlZAnk'
 
 
-
-
+webPush.setVapidDetails(
+	"mailto:mr.yunusobod@gmail.com",
+	publicKey,
+	privateKey
+)
 
 const IO = socket(server, {
   cors: {
@@ -35,7 +40,7 @@ const IO = socket(server, {
 })
 
 IO.on('connection', socket => {
-  socket.on('message', async ({userID, selectedUser, text, pushNotify }) => {
+  socket.on('message', async ({userID, selectedUser, text, senderUser }) => {
     const CHAT = `
         INSERT INTO chat(
           chat,
@@ -44,23 +49,28 @@ IO.on('connection', socket => {
         ) VALUES ($1, $2, $3)
         returning *
     `
-    
 
-    // let subscriber = {
-    //   "endpoint": "https://fcm.googleapis.com/fcm/send/fwiwWNsQ6as:APA91bExzR_W0m2oQUO1wUYw3eHanKlPP_f3O8LLl0f3N3RaGkAlvHSP_KKK8_22-bQoN0SF7CYYolY0wuk0tV5GV1zqrMuG8OCPDh8vSzL25I6rAExjwarIH8xRuUxxhjH6eODn_Kdl",
-    //   "expirationTime": null,
-    //   "keys": {
-    //       "p256dh": "BItOL3GO2kUYnOHF2Vi5b5TOWkVS0sYn5PmQ1hG2b6wBONQtjLCrHiHPtwY4k2nGw093u2c-6JVnupQ___5mAeM",
-    //       "auth": "MM8u5iFNQswk6q8sTHnkAg"
-    //   }
-    // }
-    let subscriber = pushNotify
-    subscriber = JSON.stringify(subscriber)
+    const SUBSC = `
+        SELECT * FROM web_push WHERE user_id = $1
+    `
     
+    let subscriber = await fetch(SUBSC, selectedUser)
+    if (subscriber) {
+      
+      let subscription = {
+        endpoint: subscriber.endpoint_b,
+        expiration_time: null,
+        keys: {
+          p256dh: subscriber.p256dh,
+          auth: subscriber.auth
+        }
+      }
+      webPush.sendNotification(subscription, senderUser + ' send: ' + text)
+    }
+
     if (text) {
       const createChat = await fetch(CHAT, text, userID, selectedUser)
       IO.emit('message', createChat)
-      
     }
   })
 })
