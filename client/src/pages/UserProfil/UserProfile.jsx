@@ -162,7 +162,7 @@ function UserProfile() {
             e.preventDefault()
             e.target.reset()
           }}>
-            <input type="file" accept='.jpg, .jpeg, .png, .xlsx, .docx' onChange={e => setDoc(e.target.files)} />
+            {/* <input type="file" accept='.jpg, .jpeg, .png, .xlsx, .docx' onChange={e => setDoc(e.target.files)} /> */}
             <input type="text" onChange={e => setText(e.target.value)} />
             <button onClick={() => {
               setSubmit(true)

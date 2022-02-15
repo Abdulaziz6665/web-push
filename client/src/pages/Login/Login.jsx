@@ -11,6 +11,7 @@ function Login() {
   const [pass, setPass] = useState()
   const [button, setButton] = useState('login')
   const [submit, setSubmit] = useState(false)
+  const [check, setCheck] = useState()
 
   const host = window.location.origin === 'http://localhost:3000' ? 'http://localhost:3001' : window.location.origin
 
@@ -33,6 +34,8 @@ function Login() {
           if (res?.data?.token) {
             localStorage.setItem('token', res?.data?.token)
             navigate('/user')
+          } else {
+            setCheck('User not found')
           }
         })()
       setName()
@@ -51,6 +54,8 @@ function Login() {
           if (res?.data?.token) {
             localStorage.setItem('token', res?.data?.token)
             navigate('/user')
+          } else {
+            setCheck(res?.data)
           }
         })()
       setName()
@@ -68,6 +73,7 @@ function Login() {
           <input type="text" onChange={takeName} placeholder='name' />
           <input type="text" onChange={takePass} placeholder='password' />
           <button onClick={() => setSubmit(true)}>{button}</button>
+          {check && <div>{check}</div>}
         </form>
       <div>
         <button onClick={e => setButton(e.target.innerHTML)}>sign up</button>

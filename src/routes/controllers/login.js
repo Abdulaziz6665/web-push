@@ -2,9 +2,6 @@ const { fetch } = require('../../pg/pg')
 const { sign, verify} = require('../../lib/jwt')
 
 module.exports = {
-  LOGIN: (req, res) => {
-    res.send('okay')
-  },
   SIGN_UP: async (req, res) => {
     try {
       const CHECK_USER = `

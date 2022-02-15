@@ -5,12 +5,14 @@ const http = require('http')
 const socket = require('socket.io')
 const webPush = require('web-push')
 const path = require('path')
-
 const { fetch, fetchAll } = require('./src/pg/pg')
+const { router } = require('./src/routes/routes')
+
 
 const server = http.createServer(app)
+
 const PORT = process.env.PORT || 3001
-const { router } = require('./src/routes/routes')
+
 
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*')
@@ -87,6 +89,5 @@ IO.on('connection', socket => {
     console.log(error)
   }
 })
-
 
 server.listen(PORT, () => console.log('port: 3001'))
