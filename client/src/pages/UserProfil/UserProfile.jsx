@@ -81,7 +81,7 @@ function UserProfile() {
   }
 
   async function register () {
-
+    console.log('lll')
     if (notify) {
       const worker = await window.navigator.serviceWorker.ready
   
@@ -90,10 +90,15 @@ function UserProfile() {
         applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
       })
   
-      axios.post('http://localhost:3001/sub', {
+      const res = await axios.post('http://localhost:3001/sub', {
         pushManager,
         userID
       })
+
+      console.log(res.data)
+      if (res.data === 'created') {
+        localStorage.setItem('notify', true)
+      }
       setNotify(false)
     }
   }
@@ -109,7 +114,10 @@ function UserProfile() {
   return (
     <>
       <button onClick={logOut}>log out</button>
-      <button onClick={register}>notification</button>
+      {!localStorage.getItem('notify') && <button onClick={() => {
+        register()
+        setNotify(true)
+      }}>notification</button>}
       {/* <button onClick={unRegister}>turn off notification</button> */}
       <div className="main-div">
         <div>
@@ -151,7 +159,6 @@ function UserProfile() {
             <input type="text" onChange={e => setText(e.target.value)} />
             <button onClick={() => {
               setSubmit(true)
-              setNotify(true)
             }}>send</button>
           </form>
         </div>}
