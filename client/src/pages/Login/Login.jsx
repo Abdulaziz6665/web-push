@@ -12,6 +12,8 @@ function Login() {
   const [button, setButton] = useState('login')
   const [submit, setSubmit] = useState(false)
 
+  const host = window.location.origin === 'http://localhost:3000' ? 'http://localhost:3001' : window.location.origin
+
   function takeName(e) {
     setName(e.target.value)
   }
@@ -24,7 +26,7 @@ function Login() {
     if (name && pass && submit && button === 'login') {
       setSubmit(false)
         ; (async () => {
-          const res = await axios.post('http://localhost:3001/login', {
+          const res = await axios.post(host+'/login', {
             name,
             pass
           })
@@ -42,7 +44,7 @@ function Login() {
     if (name && pass && submit && button === 'sign up') {
       setSubmit(false)
         ; (async () => {
-          const res = await axios.post('http://localhost:3001/signup', {
+          const res = await axios.post(host+'/signup', {
             name,
             pass
           })

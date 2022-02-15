@@ -8,8 +8,8 @@ const webPush = require('web-push')
 const { fetch, fetchAll } = require('./src/pg/pg')
 
 const server = http.createServer(app)
-
-const {router} = require('./src/routes/routes')
+const PORT = process.env.PORT || 3001
+const { router } = require('./src/routes/routes')
 
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*')
@@ -21,15 +21,23 @@ app.use(express.json())
 app.use(cors())
 app.use(router)
 
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/build')))
+
+  app.get('*', function (req, res) {
+    res.sendFile(path.join(__dirname, 'client/build/index.html'))
+  })
+}
+
 
 const publicKey = 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU'
 const privateKey = 'bzegeZthepS5705Qzq50IurA_9x7a6DcEjwzwVlZAnk'
 
 
 webPush.setVapidDetails(
-	"mailto:mr.yunusobod@gmail.com",
-	publicKey,
-	privateKey
+  "mailto:mr.yunusobod@gmail.com",
+  publicKey,
+  privateKey
 )
 
 const IO = socket(server, {
@@ -41,7 +49,7 @@ const IO = socket(server, {
 
 IO.on('connection', socket => {
   try {
-    socket.on('message', async ({userID, selectedUser, text, senderUser }) => {
+    socket.on('message', async ({ userID, selectedUser, text, senderUser }) => {
       const CHAT = `
           INSERT INTO chat(
             chat,
@@ -50,14 +58,14 @@ IO.on('connection', socket => {
           ) VALUES ($1, $2, $3)
           returning *
       `
-  
+
       const SUBSC = `
           SELECT * FROM web_push WHERE user_id = $1
       `
-      
+
       let subscriber = await fetch(SUBSC, selectedUser)
       if (subscriber) {
-        
+
         let subscription = {
           endpoint: subscriber.endpoint_b,
           expiration_time: null,
@@ -68,7 +76,7 @@ IO.on('connection', socket => {
         }
         webPush.sendNotification(subscription, senderUser + ' send: ' + text)
       }
-  
+
       if (text) {
         const createChat = await fetch(CHAT, text, userID, selectedUser)
         IO.emit('message', createChat)
@@ -80,4 +88,4 @@ IO.on('connection', socket => {
 })
 
 
-server.listen(3001, () => console.log('port: 3001'))
+server.listen(PORT, () => console.log('port: 3001'))

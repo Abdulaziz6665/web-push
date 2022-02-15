@@ -20,14 +20,16 @@ function UserProfile() {
   const [chats, setChat] = useState([])
   const [notify, setNotify] = useState(false)
 
+  const host = window.location.origin === 'http://localhost:3000' ? 'http://localhost:3001' : window.location.origin
+
   useEffect(() => {
-    const newSocket = io('http://localhost:3001')
+    const newSocket = io(host)
     setSocket(newSocket);
   }, []);
 
   useEffect(() => {
     ; (async () => {
-      const res = await axios.get('http://localhost:3001/user', {
+      const res = await axios.get(host+'/user', {
         params: {
           token: localStorage.getItem('token')
         }
@@ -62,7 +64,7 @@ function UserProfile() {
   useEffect(() => {
     if (userID && selectedUser) {
       ; (async () => {
-        const res = await axios.get('http://localhost:3001/chats-get', {
+        const res = await axios.get(host+'/chats-get', {
           params: {
             userID,
             selectedUser: selectedUser?.user_id
@@ -91,13 +93,11 @@ function UserProfile() {
           applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
         })
 
-        console.log('lll', pushManager)
-        const res = await axios.post('http://localhost:3001/sub', {
+        const res = await axios.post(host+'/sub', {
           pushManager,
           userID
         })
 
-        console.log(res.data)
         if (res.data === 'created') {
           localStorage.setItem('notify', true)
         }

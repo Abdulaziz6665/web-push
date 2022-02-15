@@ -3,9 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "14.17.0",
+    "npm": "7.14.0"
+  },
   "scripts": {
+    "client": "cd client && npm start",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "start:dev": "concurrently --kill-others-on-fail \"npm run dev\" \"npm run client\"",
+    "heroku-postbuild": "cd client && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -18,5 +25,8 @@
     "pg": "^8.7.3",
     "socket.io": "^4.4.1",
     "web-push": "^3.4.5"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0"
   }
 }
