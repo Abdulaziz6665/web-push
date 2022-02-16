@@ -126,7 +126,7 @@ function UserProfile() {
 
   useEffect(() => {
     setHasNotify(localStorage.getItem(userID))
-  }, [])
+  }, [userID])
 
   // async function unRegister() {
   //   const worker = await window.navigator.serviceWorker.ready
