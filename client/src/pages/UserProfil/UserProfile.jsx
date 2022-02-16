@@ -116,7 +116,7 @@ function UserProfile() {
         })
 
         if (res.data === 'created') {
-          localStorage.setItem('notify', true)
+          localStorage.setItem(userID, true)
         }
       })()
       setNotify(false)
@@ -125,7 +125,7 @@ function UserProfile() {
   }, [notify, userID, host])
 
   useEffect(() => {
-    setHasNotify(localStorage.getItem('notify'))
+    setHasNotify(localStorage.getItem(userID))
   }, [])
 
   // async function unRegister() {
