@@ -1,2 +1,0 @@
-[context.production]
-  command = "cd client && npm install && npm run build"

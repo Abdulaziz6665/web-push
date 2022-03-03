@@ -2,11 +2,15 @@ const express = require('express');
 const app = express()
 const cors = require('cors')
 const http = require('http')
-const socket = require('socket.io')
+const {Server} = require('socket.io')
+const fileUpload = require('express-fileupload')
 const webPush = require('web-push')
 const path = require('path')
+const fs = require('fs')
+const {promisify} = require('util')
+
 const { fetch, fetchAll } = require('./src/pg/pg')
-const { router } = require('./src/routes/routes')
+const { router} = require('./src/routes/routes')
 const { sign } = require('./src/lib/jwt')
 
 
@@ -14,6 +18,7 @@ const server = http.createServer(app)
 
 const PORT = process.env.PORT || 3001
 
+app.use(express.static(__dirname + '/uploads'))
 
 app.use((req, res, next) => {
   res.set('Access-Control-Allow-Origin', '*')
@@ -21,9 +26,11 @@ app.use((req, res, next) => {
   next()
 })
 
+app.use(fileUpload())
 app.use(express.json())
 app.use(cors())
 app.use(router)
+app.use(express.static('./src'))
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/build')))
@@ -44,16 +51,17 @@ webPush.setVapidDetails(
   privateKey
 )
 
-const IO = socket(server, {
+const IO = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
   }
 })
 
-IO.on('connection', socket => {
+IO.sockets.on('connection', socket => {
   try {
     socket.on('message', async ({ userID, selectedUser, text, senderUser }) => {
+
       const CHAT = `
           INSERT INTO chat(
             chat,
@@ -105,9 +113,51 @@ IO.on('connection', socket => {
         })
       }
     })
+
+    socket.on('new-file', async ({chat_id}) => {
+      const FIND_CHAT_FILE = `
+        SELECT * FROM chat WHERE chat_id = $1
+      `
+      const newFile = await fetch(FIND_CHAT_FILE, chat_id)
+      if (newFile) {
+        IO.emit('new-filee', newFile)
+      }
+    })
+
+    socket.on('delete', async ({del}) => {
+      const DELETE = `
+        DELETE FROM chat where chat_id = $1 returning chat_id, file_link
+      `
+      const deleted = await fetch(DELETE, del)
+
+      if (deleted.file_link) {
+        const unlink = promisify(fs.unlink)
+        await unlink(__dirname +'/src'+ deleted.file_link)
+      }
+
+      if (deleted) {
+        IO.emit('delete', deleted)
+      }
+    })
+
+    socket.on('edit-text', async ({text, chat_id}) => {
+      const UPDATE_CHAT = `
+        UPDATE chat
+        set chat = $2
+        WHERE chat_id = $1
+        returning *
+      `
+      const updated = await fetch(UPDATE_CHAT, chat_id, text)
+
+      if (updated) {
+        IO.emit('edit-text', updated)
+      }
+      
+    })
   } catch (error) {
     console.log(error)
   }
 })
+
 
 server.listen(PORT, () => console.log('port: 3001'))

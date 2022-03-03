@@ -12,14 +12,8 @@ create table users (
 create index users_idx on users(user_id)
 
 create table chat (
+  chat_id uuid not null default uuid_generate_v4() primary key,
   chat text,
-  sender_user_id uuid not null references users(user_id) on delete cascade,
-  taked_user_id uuid not null references users(user_id) on delete cascade,
-  created_at timestamptz default CURRENT_TIMESTAMP
-);
-
-create table files (
-  file_id uuid not null default uuid_generate_v4() primary key,
   file_link varchar(128),
   sender_user_id uuid not null references users(user_id) on delete cascade,
   taked_user_id uuid not null references users(user_id) on delete cascade,
