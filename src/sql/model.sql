@@ -20,6 +20,8 @@ create table chat (
   created_at timestamptz default CURRENT_TIMESTAMP
 );
 
+create index chat_idx on chat(chat_id);
+
 create table web_push (
   user_id uuid not null references users(user_id) on delete cascade,
   endpoint_b text not null,
