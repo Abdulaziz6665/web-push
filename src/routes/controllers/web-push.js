@@ -17,6 +17,8 @@ module.exports = {
       `
       let { pushManager, userID } = req.body
       let subscriber = await fetch(SUBSC, userID)
+
+      console.log(pushManager)
       
       if (!subscriber) {
         

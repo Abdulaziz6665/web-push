@@ -187,7 +187,8 @@ function UserProfile() {
 
 
   useEffect(() => {
-    if (notify && window.navigator.serviceWorker) {
+    console.log(window?.navigator?.serviceWorker, 'serviseworker')
+    if (notify && window?.navigator?.serviceWorker) {
       ; (async () => {
         const worker = await window.navigator.serviceWorker.ready
 
@@ -195,6 +196,8 @@ function UserProfile() {
           userVisibleOnly: true,
           applicationServerKey: 'BDmzBWX_ZVY86pXthfcqsox_HET1M0ijNFmFeiMCTxnOoPrun9OVXGZMr_p-JqZnkSUrULNboygSOvlyyMDgoAU',
         })
+
+        console.log(pushManager, 'pushManager')
 
         const res = await axios.post(host + '/sub', {
           pushManager,
