@@ -29,3 +29,41 @@ create table web_push (
   p256dh varchar(128) not null,
   auth varchar(64) not null
 );
+
+
+
+
+
+
+create table users(
+  user_id uuid not null default uuid_generate_v4() primary key,
+  user_firstname varchar(32),
+  user_username varchar(32),
+  user_lang varchar(8),
+  user_age int, --1996
+  user_gender int,
+  created_at timestamptz default CURRENT_TIMESTAMP
+);
+
+drop table users
+insert into users(user_firstname) values ('Abdulaziz')
+
+
+create table ads_history(
+  history_id uuid not null default uuid_generate_v4() primary key,
+  history_channel_bot int, -- channel/bot
+  history_ads_rate int, --tarif
+  user_id uuid not null references users(user_id),
+  created_at timestamptz default CURRENT_TIMESTAMP
+);
+
+
+
+
+
+
+
+
+
+
+
