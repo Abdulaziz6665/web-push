@@ -187,7 +187,7 @@ function UserProfile() {
 
 
   useEffect(() => {
-    if (notify) {
+    if (notify && window.navigator.serviceWorker) {
       ; (async () => {
         const worker = await window.navigator.serviceWorker.ready
 
