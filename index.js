@@ -14,6 +14,8 @@ const { router} = require('./src/routes/routes')
 const { sign } = require('./src/lib/jwt')
 
 
+
+
 const server = http.createServer(app)
 
 const PORT = process.env.PORT || 3001
